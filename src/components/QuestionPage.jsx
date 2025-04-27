@@ -26,14 +26,66 @@ export default function QuestionPage() {
                 setQuestions(data);
                 setLoading(false);
             } catch (error) {
-                toast.error("Failed to load quiz questions", {
-                    description: "Please try again later",
-                });
+                toast.error(
+                    "Failed to load quiz questions. Please try again later.",
+                    {
+                        action: {
+                            label: "Retry",
+                            onClick: () => loadData(),
+                        },
+                        style: {
+                            background: "#FEF2F2",
+                            color: "#B91C1C",
+                            borderLeft: "4px solid #DC2626",
+                        },
+                    }
+                );
                 navigate("/");
             }
         }
         loadData();
     }, [navigate]);
+
+    const handleTimeout = useCallback(() => {
+        toast("Time's up! Moving to next question.", {
+            style: {
+                background: "#FFFBEB",
+                color: "#92400E",
+                borderLeft: "4px solid #F59E0B",
+            },
+        });
+
+        // Only record if we haven't already recorded this unanswered question
+        setSelectedAnswers((prev) => {
+            // Check if we've already recorded this question
+            if (
+                prev.some(
+                    (a) => a.question === questions[currentQuestion].question
+                )
+            ) {
+                return prev;
+            }
+
+            return [
+                ...prev,
+                {
+                    question: questions[currentQuestion].question,
+                    selectedAnswer: null,
+                    correctAnswer: questions[currentQuestion].answer,
+                    isCorrect: false,
+                },
+            ];
+        });
+
+        const nextQuestion = currentQuestion + 1;
+        if (nextQuestion < questions.length) {
+            setCurrentQuestion(nextQuestion);
+            setTimeLeft(30);
+        } else {
+            setShowResults(true);
+            displayResults();
+        }
+    }, [currentQuestion, questions]);
 
     useEffect(() => {
         if (!quizStarted || showResults) return;
@@ -41,23 +93,33 @@ export default function QuestionPage() {
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
+                    clearInterval(timer);
                     handleTimeout();
-                    return 30;
+                    return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [quizStarted, currentQuestion, showResults]);
+    }, [quizStarted, currentQuestion, showResults, handleTimeout]);
 
-    const handleTimeout = useCallback(() => {
-        toast.warning("Time's up!", {
-            description: "Moving to next question",
-        });
+    useEffect(() => {
+        if (!quizStarted || showResults) return;
 
-        handleNextQuestion(null);
-    }, []);
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    handleTimeout();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [quizStarted, currentQuestion, showResults, handleTimeout]);
 
     const progress = (currentQuestion / questions.length) * 100;
 
@@ -77,13 +139,34 @@ export default function QuestionPage() {
 
         if (isCorrect) {
             setCorrectAnswers((prev) => prev + 1);
-            toast.success("Correct answer!", {
-                description: "Well done! 🎉",
+            toast("Correct! Well done! 🎉", {
+                style: {
+                    background: "#ECFDF5",
+                    color: "#065F46",
+                    borderLeft: "4px solid #10B981",
+                },
             });
         } else {
-            toast.error("Incorrect answer", {
-                description: `The correct answer was: ${currentQuestionData.answer}`,
-            });
+            toast(
+                `Incorrect! The correct answer was: ${currentQuestionData.answer}`,
+                {
+                    style: {
+                        background: "#FEF2F2",
+                        color: "#B91C1C",
+                        borderLeft: "4px solid #EF4444",
+                    },
+                    action: {
+                        label: "Learn More",
+                        onClick: () =>
+                            window.open(
+                                `https://www.google.com/search?q=${encodeURIComponent(
+                                    currentQuestionData.question
+                                )}`,
+                                "_blank"
+                            ),
+                    },
+                }
+            );
         }
 
         handleNextQuestion(selectedOption);
@@ -104,14 +187,33 @@ export default function QuestionPage() {
         const percentage = (correctAnswers / questions.length) * 100;
         let message = "";
 
-        if (percentage >= 80) message = "Excellent performance! 🏆";
-        else if (percentage >= 60) message = "Good job! 👍";
-        else message = "Keep practicing! 💪";
-
-        toast.message("Quiz Completed!", {
-            description: `${message}\nScore: ${correctAnswers}/${
+        if (percentage >= 80)
+            message = `Excellent! 🏆 You scored ${correctAnswers}/${
                 questions.length
-            } (${percentage.toFixed(1)}%)`,
+            } (${percentage.toFixed(1)}%)`;
+        else if (percentage >= 60)
+            message = `Good job! 👍 You scored ${correctAnswers}/${
+                questions.length
+            } (${percentage.toFixed(1)}%)`;
+        else
+            message = `Keep practicing! 💪 You scored ${correctAnswers}/${
+                questions.length
+            } (${percentage.toFixed(1)}%)`;
+
+        toast(message, {
+            style: {
+                background: "#EFF6FF",
+                color: "#1E40AF",
+                borderLeft: "4px solid #3B82F6",
+            },
+            action: {
+                label: "Review Answers",
+                onClick: () =>
+                    window.scrollTo({
+                        top: document.body.scrollHeight,
+                        behavior: "smooth",
+                    }),
+            },
         });
     };
 
@@ -167,7 +269,8 @@ export default function QuestionPage() {
                                 />
                                 <p className="text-sm text-gray-600">
                                     Your answer:{" "}
-                                    {answer.selectedAnswer || "Not answered"}
+                                    {answer.selectedAnswer ||
+                                        "Time expired (no answer)"}
                                 </p>
                                 <p
                                     className={`text-sm ${
@@ -230,17 +333,48 @@ export default function QuestionPage() {
 
                         <div className="mt-4 text-center">
                             <Button
-                                variant="ghost"
+                                variant="outline"
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
                                 onClick={() => {
-                                    if (
-                                        confirm(
-                                            "Are you sure you want to quit the quiz?"
-                                        )
-                                    ) {
-                                        navigate("/");
-                                    }
+                                    toast(
+                                        "Are you sure you want to quit? All progress will be lost.",
+                                        {
+                                            style: {
+                                                background: "#FFFBEB",
+                                                color: "#92400E",
+                                                borderLeft: "4px solid #F59E0B",
+                                            },
+                                            action: {
+                                                label: "Quit",
+                                                onClick: () => navigate("/"),
+                                                style: {
+                                                    background: "#EF4444",
+                                                    color: "white",
+                                                },
+                                            },
+                                            cancel: {
+                                                label: "Continue",
+                                                style: {
+                                                    background: "#10B981",
+                                                    color: "white",
+                                                },
+                                            },
+                                        }
+                                    );
                                 }}
                             >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5 mr-2"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
                                 Quit Quiz
                             </Button>
                         </div>
