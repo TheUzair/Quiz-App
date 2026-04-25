@@ -1,185 +1,231 @@
-# 🎯 Quiz App
+# 🚀 Quiz App
 
-A dynamic and engaging quiz application built with React.js, featuring timed questions, answer validation, and real-time progress tracking.
+A **timed, interactive quiz application** built with modern web technologies.
+It fetches real-time questions from QuizAPI.io via a **secure server-side proxy**, ensuring your API key is never exposed to the client.
 
-🔗 **Live Demo:** [Quiz App on Vercel](https://quiz-app-ten-swart.vercel.app/)
+👉 **Live Demo:** [https://quiz-app-ten-swart.vercel.app/](https://quiz-app-ten-swart.vercel.app/)
 
-![Quiz App Screenshot](/public/quiz-app-ss.jpg)
-
----
-
-## ✨ Key Features
-
-| Feature                     | Description                                               |
-| --------------------------- | --------------------------------------------------------- |
-| **⏱️ Timed Questions**      | 30-second limit per question with auto-submit on timeout. |
-| **📊 Progress Tracking**    | Visual progress bar showing completion percentage.        |
-| **✅ Answer Validation**    | Instant feedback (correct/incorrect) after selection.     |
-| **📱 Responsive Design**    | Works seamlessly on mobile, tablet, and desktop.          |
-| **🌐 Offline Support**      | Fallback questions if API fails.                          |
-| **🏆 Performance Feedback** | Personalized results message based on score.              |
+![Quiz App Screenshot](public/quiz-app-ss.jpg)
 
 ---
 
-## 🛠️ Technologies
+## ✨ Highlights
+
+- ⏱️ **Timed Questions** — 30-second countdown with automatic progression
+- 📊 **Progress Tracking** — Real-time progress bar
+- ⚡ **Instant Feedback** — Correct/incorrect responses via toast notifications
+- 🏆 **Performance Summary** — Personalized result based on score
+- 🌐 **Offline Fallback** — Seamless experience even if API fails
+- 🔐 **Secure API Proxy** — API key never exposed to frontend
+- 📱 **Fully Responsive** — Optimized for all screen sizes
+
+---
+
+## 🧠 How It Works
+
+```
+Browser → /api/questions → Proxy (Express/Vercel) → QuizAPI.io
+```
+
+- **Development**
+  - Vite proxies `/api` → local Express server
+
+- **Production**
+  - Vercel routes `/api/questions` → serverless function
+
+- API key stays **100% secure on server**
+
+---
+
+## 🛠 Tech Stack
 
 ### Frontend
 
--   **React.js** (Vite)
--   **Tailwind CSS** + **Shadcn/UI** (Styled components)
--   **React Router** (Navigation)
--   **Lucide-react** (Icons)
+- ⚛️ React (Vite)
+- 🎨 Tailwind CSS + shadcn/ui
+- 🔀 React Router
+- 🔔 Sonner (toast notifications)
+- 🎯 Lucide React (icons)
 
-### Backend
+### Backend / API
 
--   **[QuizAPI.io](https://quizapi.io/)** (Primary question source)
+- 🌍 QuizAPI.io
+- 🧩 Express (local proxy)
+- ⚡ Vercel Serverless Functions
 
 ### Deployment
 
--   **Vercel** (Hosting)
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
--   [Node.js](https://nodejs.org/)
--   [npm](https://npmjs.com/)
-
-### Installation
-
-1. Clone this repository:
-
-    ```bash
-    git clone https://github.com/theuzair/quiz-app.git
-    ```
-
-2. Navigate into the project directory:
-
-    ```bash
-    cd quiz-app
-    ```
-
-3. Install the dependencies:
-
-    ```bash
-    npm install
-    ```
-
-4. (Optional) Create a `.env.local` file in the root directory for storing environment variables (e.g., API keys, if required).
-
-5. Run the app locally:
-
-    ```bash
-    npm run dev
-    ```
-
-6. Open the app in your browser at [http://localhost:5173](http://localhost:5173).
+- ▲ Vercel
 
 ---
 
 ## 📂 Project Structure
 
 ```
-/quiz-app
-├── /components
-│   ├── QuizCard.js        # Component for displaying each quiz question and options
-│   ├── ui/
-│   │   ├── button.js      # UI components like Button
-│   │   ├── progress.js    # Progress bar component
-├── /data
-│   ├── quizData.js        # Helper functions to fetch quiz data and handle questions
-├── /pages
-│   ├── index.js           # Landing page to start the quiz
-│   ├── question.js        # Page for displaying each question and handling user answers
-├── /public
-│   ├── /images            # Static assets (images, icons, etc.)
-├── tailwind.config.js      # Tailwind CSS configuration
-├── package.json            # Project dependencies and scripts
-├── README.md               # Project README
-└── .gitignore              # Git ignore file
-
+quiz-app/
+├── api/
+│   └── questions.js          # Serverless API proxy
+├── src/
+│   ├── components/
+│   │   ├── Home.jsx
+│   │   ├── QuestionPage.jsx
+│   │   ├── QuizCard.jsx
+│   │   └── ui/
+│   └── data/
+│       ├── quizData.js
+│       └── fallbackQuestions.js
+├── server.js                # Express proxy (dev only)
+├── vite.config.js
+├── vercel.json
+└── .env.local
 ```
 
 ---
 
-## � Usage Guide
+## ⚙️ Getting Started
 
-1. **Start Quiz**
+### Prerequisites
 
-    - Click "Start Quiz" to begin.
-
-2. **Answer Questions**
-
-    - Select an option or wait for timeout (30s).  
-      ![Question Example](/public/ques-ss.jpg)
-
-3. **View Results**
-
-    - Score breakdown and performance feedback.
-
-4. **Restart**
-    - Click "Restart Quiz" to play again.
+- Node.js (v18+)
+- npm
+- API key from QuizAPI.io
 
 ---
 
-## 🌟 Advanced Features
+### 🔧 Installation
 
-### Timeout Handling
-
-```jsx
-useEffect(() => {
-    const timer = setTimeout(() => {
-        handleNextQuestion();
-    }, 30000);
-    return () => clearTimeout(timer);
-}, [currentQuestion]);
+```bash
+git clone https://github.com/theuzair/quiz-app.git
+cd quiz-app
+npm install
 ```
 
-### Fallback Data System
+---
 
-If the API fails, the app loads fallback questions.
+### 🔐 Environment Variables
+
+Create `.env.local`:
+
+```env
+QUIZ_API_KEY=your_api_key_here
+```
+
+⚠️ Do NOT use `VITE_` prefix — this must stay server-side.
+
+---
+
+### ▶️ Run Locally
+
+```bash
+npm run dev
+```
+
+- Frontend → [http://localhost:5173](http://localhost:5173)
+- Proxy → [http://localhost:3001](http://localhost:3001)
+
+---
+
+### 📦 Build
+
+```bash
+npm run build
+```
+
+---
+
+## 🚀 Deployment
+
+Deploy instantly using:
+
+```bash
+npx vercel --prod
+```
+
+Then add environment variable:
+
+```bash
+npx vercel env add QUIZ_API_KEY production
+```
+
+---
+
+## 🎮 Usage
+
+1. Click **Start Quiz**
+2. Answer within **30 seconds**
+3. Get **instant feedback**
+4. View **final score & analysis**
+5. Restart anytime 🔁
+
+---
+
+## ⚡ Advanced Features
+
+### ⏳ Timeout System
+
+- Automatically advances if no answer selected
+- Prevents quiz blocking
+
+### 🔄 Fallback System
+
+- If API fails → loads local questions
+- Ensures uninterrupted UX
+
+### 🔐 API Security
+
+- No API key exposure in frontend
+- Serverless proxy handles all requests
+
+---
+
+## 📸 Screenshots
+
+### Question View
+
+![Question Screenshot](public/ques-ss.jpg)
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community. If you'd like to contribute, please follow the steps below:
+Contributions are welcome!
 
-1. **Fork** the repository to your own GitHub account.
-2. **Clone** the forked repository to your local machine:
+```bash
+# Fork repo
+git checkout -b feature-name
+git commit -m "Add feature"
+git push origin feature-name
+```
 
-    ```bash
-    git clone https://github.com/theuzair/quiz-app.git
-    ```
-
-3. Create a **new branch** for your feature or fix:
-
-    ```bash
-    git checkout -b feature-branch
-    ```
-
-4. **Make changes** and commit them with a descriptive message:
-
-    ```bash
-    git commit -am 'Add new feature or fix bug'
-    ```
-
-5. Push your changes to your forked repository:
-
-    ```bash
-    git push origin feature-branch
-    ```
-
-6. Open a **pull request** to the main repository with a description of your changes.
+Then open a Pull Request 🚀
 
 ---
 
-## 📜 License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the [MIT License](LICENSE) — free to use and modify.
+
+---
+
+## 💡 Future Improvements
+
+- 🎯 Category & difficulty filters
+- 🧠 Leaderboard system
+- 📊 Analytics dashboard
+- 🌍 Multi-language support
+- 👤 User authentication
+
+---
+
+## 👨‍💻 Author
+
+**Uzair**
+Full Stack Developer (MERN + DevOps in progress)
+
+---
+
+## ⭐ Support
+
+If you found this project helpful, consider giving it a ⭐ on GitHub!
 
 ---
